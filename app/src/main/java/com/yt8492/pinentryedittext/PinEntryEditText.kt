@@ -12,6 +12,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.ViewCompat
 
 class PinEntryEditText @JvmOverloads constructor(
@@ -22,6 +23,7 @@ class PinEntryEditText @JvmOverloads constructor(
     val pinLength: Int
     val space: Float
     val pinBackgroundDrawable: Drawable?
+    val pinCoverDrawable: Drawable?
     val pinWidth: Float
     val pinHeight: Float
     private val charPaint = Paint(paint)
@@ -45,6 +47,7 @@ class PinEntryEditText @JvmOverloads constructor(
         context.obtainStyledAttributes(attrs, R.styleable.PinEntryEditText).also { typedArray ->
             space = typedArray.getDimension(R.styleable.PinEntryEditText_space, 10f)
             pinBackgroundDrawable = typedArray.getDrawable(R.styleable.PinEntryEditText_pinBackgroundDrawable)
+            pinCoverDrawable = typedArray.getDrawable(R.styleable.PinEntryEditText_pinCoverDrawable)
             pinWidth = typedArray.getDimension(R.styleable.PinEntryEditText_pinWidth, DEFAULT_PIN_SIZE)
             pinHeight = typedArray.getDimension(R.styleable.PinEntryEditText_pinHeight, DEFAULT_PIN_SIZE)
         }.recycle()
@@ -91,6 +94,7 @@ class PinEntryEditText @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         val text = text ?: ""
         paint.getTextWidths(text, 0, text.length, textWidths)
+        val pinCoverBmp = pinCoverDrawable?.toBitmap()
         repeat(pinLength) { i ->
             lineCoords[i]?.let { lineCoord ->
                 pinBackgroundDrawable?.let { pinBackground ->
@@ -99,7 +103,11 @@ class PinEntryEditText @JvmOverloads constructor(
                 }
                 val middle = lineCoord.left + pinWidth / 2
                 if (i < text.length) {
-                    canvas.drawText(text, i, i + 1, middle - textWidths[i] / 2, (lineCoord.top + lineCoord.bottom) / 2 - textHeight, charPaint)
+                    if (pinCoverBmp != null) {
+                        canvas.drawBitmap(pinCoverBmp, middle - pinCoverBmp.width / 2 , (lineCoord.top + lineCoord.bottom) / 2 - pinCoverBmp.height / 2, charPaint)
+                    } else {
+                        canvas.drawText(text, i, i + 1, middle - textWidths[i] / 2, (lineCoord.top + lineCoord.bottom) / 2 - textHeight, charPaint)
+                    }
                 }
             }
         }

@@ -12,7 +12,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="85dp"
             android:layout_marginEnd="85dp"
-            android:gravity="center_horizontal"
             android:padding="5dp"
             android:maxLength="4"
             android:inputType="number"
@@ -20,9 +19,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:pinBackgroundDrawable="@drawable/pin_background"
+            app:pinCoverDrawable="@drawable/pin_cover"
             app:pinWidth="40dp"
             app:pinHeight="45dp"
-            app:space="10dp"
-    />
+            app:space="10dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
