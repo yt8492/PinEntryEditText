@@ -9,11 +9,11 @@ import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.Log
-import android.view.View
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.toRect
 import androidx.core.view.ViewCompat
+import kotlin.math.min
 
 class PinEntryEditText @JvmOverloads constructor(
     context: Context,
@@ -69,6 +69,24 @@ class PinEntryEditText @JvmOverloads constructor(
         setBackgroundResource(0)
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width: Int = (pinWidth * pinLength + space * (pinLength - 1)).toInt()
+        val height: Int = (paddingTop + pinHeight + paddingBottom).toInt()
+        val measuredWidth = when (MeasureSpec.getMode(widthMeasureSpec)) {
+            MeasureSpec.EXACTLY -> MeasureSpec.getSize(widthMeasureSpec)
+            MeasureSpec.AT_MOST -> min(width, MeasureSpec.getSize(widthMeasureSpec))
+            MeasureSpec.UNSPECIFIED -> width
+            else -> error("Unknown Mode: ${MeasureSpec.getMode(widthMeasureSpec)}")
+        }
+        val measuredHeight = when (MeasureSpec.getMode(heightMeasureSpec)) {
+            MeasureSpec.EXACTLY -> MeasureSpec.getSize(heightMeasureSpec)
+            MeasureSpec.AT_MOST -> min(height, MeasureSpec.getSize(heightMeasureSpec))
+            MeasureSpec.UNSPECIFIED -> height
+            else -> error("Unknown Mode: ${MeasureSpec.getMode(heightMeasureSpec)}")
+        }
+        setMeasuredDimension(measuredWidth, measuredHeight)
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         textColors?.let { originalTextColors ->
@@ -76,19 +94,12 @@ class PinEntryEditText @JvmOverloads constructor(
         }
         val availableWidth = width - ViewCompat.getPaddingStart(this) - ViewCompat.getPaddingEnd(this)
         charSize = (availableWidth - space * (pinLength - 1)) / pinLength
-        var startX = ViewCompat.getPaddingStart(this).toFloat()
-        val top = paddingTop.toFloat()
+        var startX = width / 2 - (pinWidth * pinLength + space * (pinLength - 1)) / 2
+        val top = height / 2 - pinHeight / 2
         repeat(pinLength) { i ->
             lineCoords[i] = RectF(startX, top, startX + pinWidth, top + pinHeight)
             startX += pinWidth + space
         }
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val measuredWidth: Int = (pinWidth * pinLength + space * pinLength).toInt()
-        val measuredHeight: Int = (paddingTop + pinHeight + paddingBottom).toInt()
-        setMeasuredDimension(View.resolveSizeAndState(measuredWidth, widthMeasureSpec, 1),
-            View.resolveSizeAndState(measuredHeight, heightMeasureSpec, 0))
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -98,7 +109,7 @@ class PinEntryEditText @JvmOverloads constructor(
         repeat(pinLength) { i ->
             lineCoords[i]?.let { lineCoord ->
                 pinBackgroundDrawable?.let { pinBackground ->
-                    pinBackground.setBounds(lineCoord.left.toInt(), lineCoord.top.toInt(), lineCoord.right.toInt(), lineCoord.bottom.toInt())
+                    pinBackground.bounds = lineCoord.toRect()
                     pinBackground.draw(canvas)
                 }
                 val middle = lineCoord.left + pinWidth / 2

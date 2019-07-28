@@ -2,11 +2,9 @@
 <resources>
     <declare-styleable name="PinEntryEditText">
         <attr name="space" format="dimension" />
-        <attr name="pinPadding" format="dimension" />
         <attr name="pinBackgroundDrawable" format="reference" />
         <attr name="pinCoverDrawable" format="reference" />
         <attr name="pinWidth" format="dimension" />
         <attr name="pinHeight" format="dimension" />
-        <attr name="textBottomPadding" format="dimension" />
     </declare-styleable>
 </resources>
